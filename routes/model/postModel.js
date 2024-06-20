@@ -24,6 +24,7 @@ async function addSpecification(fastify, options) {
         let productName;
         let thumbnail;
         let productLink;
+        thumbnail = `public/image/`
 
         const parts = req.parts();
 
@@ -90,11 +91,11 @@ async function addSpecification(fastify, options) {
         const variant = {
           colorCode: colorCode,
           photo: photoModel._id,
-          thumbnail: 'public/image/21335128.jpg',
+          thumbnail: thumbnail,
           variantFields: variantFields  // Use the initialized variantFields
         };
         
-        const variantModel = new Variants({ variants: { variant1: variant } });
+        const variantModel = new Variants({ variants: [variant] }); // Use array for variants
         await variantModel.save();
         
         const model = new Model2({
@@ -175,11 +176,11 @@ async function addSpecification(fastify, options) {
         const newVariant = {
           photo: photoModel._id,
           thumbnail: thumbnail,
-          colorCode:colorCode,
+          colorCode: colorCode,
           variantFields: variant
         };
   
-        variantModel.variants.set(`variant${variantModel.variants.size + 1}`, newVariant);
+        variantModel.variants.push(newVariant); // Use push to add new variant to the array
         await variantModel.save();
   
         let model2 = await Model2.findOne({ variants: req.params.id });
@@ -205,19 +206,6 @@ async function addSpecification(fastify, options) {
       }
     }
   );
-
-
-
-
-
-
-
-
-
-
-
-
-  
 }
 
 module.exports = addSpecification;

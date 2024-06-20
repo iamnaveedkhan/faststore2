@@ -59,7 +59,7 @@ async function getProduct(fastify, options) {
       try {
         const userId = req.params.id;
         let existingData;
-        if (userId.length > 10) {
+        // if (userId.length > 10) {
           existingData = await Product.find({ _id: userId })
             .populate('user')
             .populate('specification')
@@ -71,11 +71,11 @@ async function getProduct(fastify, options) {
                 model: 'Photo'  // Assuming 'Photo' is the model for photos
               }
             });
-        } else {
-          existingData = await Product.find({
-            "product.groupId": userId,
-          }).populate('user');
-        }
+        // } else {
+        //   existingData = await Product.find({
+        //     "product.groupId": userId,
+        //   }).populate('user');
+        // }
   
         if (existingData.length > 0) {
           reply.send(existingData);

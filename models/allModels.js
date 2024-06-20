@@ -185,27 +185,20 @@ const variantSchema = new mongoose.Schema({
 
 const variantsSchema = new mongoose.Schema({
   variants: {
-    type: Map,
-    of: variantSchema
+    type: [variantSchema], // Changed from Map to Array
+    default: [] // Ensure it defaults to an empty array
   }
 });
 
-// Pre-save middleware to auto-generate keys
+// Pre-save middleware to ensure each variant has an _id (if needed)
 variantsSchema.pre('save', function (next) {
   const doc = this;
   if (doc.isModified('variants') || doc.isNew) {
-    const newVariants = new Map();
-    let index = 1;
-
-    for (const [key, value] of doc.variants.entries()) {
-      // Ensure each variant has an _id
-      // if (!value._id) {
-      //   value._id = new mongoose.Types.ObjectId();
-      // }
-      newVariants.set(`variant${index}`, value);
-      index++;
-    }
-    doc.variants = newVariants;
+    doc.variants.forEach(variant => {
+      if (!variant._id) {
+        variant._id = new mongoose.Types.ObjectId();
+      }
+    });
   }
   next();
 });
