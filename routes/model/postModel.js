@@ -20,8 +20,9 @@ async function addSpecification(fastify, options) {
         let proper = {};
         let type;
         let filter = {};
-        let variantFields = {};  // Initialize variantFields here
+        let variantFields = {}; 
         let productName;
+        let thumbnail;
         let productLink;
 
         const parts = req.parts();
@@ -32,7 +33,11 @@ async function addSpecification(fastify, options) {
             const filePath = path.join("public/image/", fileName);
             const writableStream = fs.createWriteStream(filePath);
             await part.file.pipe(writableStream);
-            photos.push(`public/image/${fileName}`);
+            if(part.fieldname === "thumbnail"){
+              thumbnail = `public/image/${fileName}`
+            }else{
+              photos.push(`public/image/${fileName}`);
+            }
           } else {
             if (part.fieldname.startsWith("specification.")) {
               spec[part.fieldname] = part.value;
