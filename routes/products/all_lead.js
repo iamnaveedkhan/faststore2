@@ -723,7 +723,7 @@ async function getProduct(fastify, options) {
         if (!userData) {
           return reply.send({ error: "Not authorized" });
         }
-        const models = await Model2.find({ main: true });
+        const models = await Model2.find();
         // Aggregate to get unique products by groupId
         // const uniqueProducts = await Product.aggregate([
         //   {

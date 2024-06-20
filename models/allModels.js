@@ -233,7 +233,9 @@ const productSchema = new mongoose.Schema({
     productLink: { type: String, default: "" },
     type: { type: String, default: null },
   },
+  variantId:{ type: Schema.Types.ObjectId, ref: "Variants" },
   variants:{
+    _id:{ type: String, default: "" },
     photo: {type: mongoose.Schema.Types.ObjectId,required: true},
     thumbnail: {type: String,required: true},
     colorCode: {type: String,default: ''},
