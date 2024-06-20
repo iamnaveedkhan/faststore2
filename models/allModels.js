@@ -154,6 +154,7 @@ const model2Schema = new mongoose.Schema({
     productLink: { type: String, default: "" },
     type: { type: String, default: null },
   },
+  thumbnail: { type: String, default: "" },
   variants: { type: Schema.Types.ObjectId, ref: "Variants" },
   filters: mongoose.Schema.Types.Mixed,
   

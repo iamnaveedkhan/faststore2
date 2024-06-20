@@ -19,6 +19,7 @@ const {
 
 async function getProduct(fastify, options) {
   fastify.register(require("@fastify/multipart"));
+
   fastify.get("/products", async (req, reply) => {
     try {
       const existingData = await Product.find().populate("user");
@@ -59,7 +60,7 @@ async function getProduct(fastify, options) {
         const userId = req.params.id;
         let existingData;
         if (userId.length > 10) {
-          existingData = await Product.find({ _id: userId }).populate("user");
+          existingData = await Product.find({ _id: userId }).populate("user").populate("variantId").populate("specification");
         } else {
           existingData = await Product.find({
             "product.groupId": userId,
@@ -128,11 +129,10 @@ async function getProduct(fastify, options) {
     async (req, reply) => {
       try {
         const verticalId = req.params.id;
-        console.log(verticalId);
         const existingData = await Model2.find({
           "properties.vertical": verticalId,
         });
-        console.log("aaaaaaaaa:", existingData);
+
         if (existingData) {
           reply.send(existingData);
         } else {
@@ -190,7 +190,7 @@ async function getProduct(fastify, options) {
 
   fastify.get(
     "/models",
-    // { onRequest: [fastify.authenticate] },
+    { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
         const existingData = await Model2.find().populate('variants').populate('specification');
@@ -470,13 +470,13 @@ async function getProduct(fastify, options) {
   );
 
   fastify.get(
-    "/nearbyAndOffers/:id",
-    // { onRequest: [fastify.authenticate] },
+    "/nearbyAndOffers",
+    { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
         const EARTH_RADIUS_KM = 6371;
         const maxDistance = 5;
-        const userId = req.params.id;
+        const userId = req.user.userId._id;
         console.log(userId);
 
         // Retrieve user's location
@@ -523,12 +523,12 @@ async function getProduct(fastify, options) {
           { $replaceRoot: { newRoot: "$product" } },
         ]);
 
-        await Promise.all(
-          uniqueProducts.map(async (prod) => {
-            // prod.product = await Model2.findById(prod.product._id);
-            prod.user = await Retailer.findById(prod.user._id);
-          })
-        );
+        // await Promise.all(
+        //   uniqueProducts.map(async (prod) => {
+        //     // prod.product = await Model2.findById(prod.product._id);
+        //     prod.user = await Retailer.findById(prod.user._id);
+        //   })
+        // );
 
 
         // await Promise.all(
