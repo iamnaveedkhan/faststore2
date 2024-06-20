@@ -60,13 +60,23 @@ async function getProduct(fastify, options) {
         const userId = req.params.id;
         let existingData;
         if (userId.length > 10) {
-          existingData = await Product.find({ _id: userId }).populate("user").populate("variantId").populate("specification");
+          existingData = await Product.find({ _id: userId })
+            .populate('user')
+            .populate('specification')
+            .populate('variantId')
+            .populate({
+              path: 'variants',
+              populate: {
+                path: 'photo',
+                model: 'Photo'  // Assuming 'Photo' is the model for photos
+              }
+            });
         } else {
           existingData = await Product.find({
             "product.groupId": userId,
-          }).populate("user");
+          }).populate('user');
         }
-
+  
         if (existingData.length > 0) {
           reply.send(existingData);
         } else {
@@ -78,6 +88,7 @@ async function getProduct(fastify, options) {
       }
     }
   );
+  
 
   fastify.get(
     "/productsbysubcategory/:id",
