@@ -196,6 +196,7 @@ async function Upload(fastify, options) {
 
           const newProductData = {
             price: price,
+            variantId:allVariant,
             variants:variant,
             quantity: quantity,
             specification:product.specification,
