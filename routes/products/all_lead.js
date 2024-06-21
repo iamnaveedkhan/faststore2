@@ -98,7 +98,7 @@ async function getProduct(fastify, options) {
         const subCategoryId = req.params.id;
         const existingData = await Product.find({
           "product.properties.subcategory": subCategoryId,
-        }).populate("user");
+        });
 
         if (existingData) {
           reply.send(existingData);
@@ -563,6 +563,51 @@ async function getProduct(fastify, options) {
       }
     }
   );
+
+  fastify.get(
+    "/nearby-retailers",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      try {
+        const EARTH_RADIUS_KM = 6371;
+        const maxDistance = 5;
+        const userId = req.user.userId._id;
+
+        const user = await Customer.findById(userId);
+        const userLatitude = parseFloat(user.latitude);
+        const userLongitude = parseFloat(user.longitude);
+
+        const deltaLatitude = (maxDistance / EARTH_RADIUS_KM) * (180 / Math.PI);
+        const deltaLongitude =
+          ((maxDistance / EARTH_RADIUS_KM) * (180 / Math.PI)) /
+          Math.cos((userLatitude * Math.PI) / 180);
+        const minLatitude = userLatitude - deltaLatitude;
+        const maxLatitude = userLatitude + deltaLatitude;
+        const minLongitude = userLongitude - deltaLongitude;
+        const maxLongitude = userLongitude + deltaLongitude;
+      
+
+        const nearbyUsers = await Retailer.find({
+          latitude: { $gte: minLatitude, $lte: maxLatitude },
+          longitude: { $gte: minLongitude, $lte: maxLongitude },
+
+        });
+        const retailorsProducts = await Product.find({user: { $in: nearbyUsers }}).populate('user')
+        let users = [];
+        for await (const x of retailorsProducts){
+          users.push(x.user);
+
+        }
+
+        reply.send(users);
+      } catch (error) {
+        console.error(error);
+        reply.code(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+
+
   fastify.get(
     "/productsOnRetailer",
     { onRequest: [fastify.authenticate] },
@@ -570,9 +615,7 @@ async function getProduct(fastify, options) {
       try {
         const userid = req.user.userId._id;
         console.log(userid);
-        const existingData = await Product.find({ user: userid }).populate(
-          "user"
-        );
+        const existingData = await Product.find({ user: userid }) ;
 
         return existingData;
       } catch (error) {
@@ -708,9 +751,7 @@ async function getProduct(fastify, options) {
         let existingData;
 
         if (userData) {
-          existingData = await Product.find({ user: userData }).populate(
-            "user"
-          );
+          existingData = await Product.find({ user: userData });
         } else {
           reply.send({ error: "Not authroized" });
         }
@@ -1121,12 +1162,12 @@ async function getProduct(fastify, options) {
           { $replaceRoot: { newRoot: "$product" } },
         ]);
 
-        await Promise.all(
-          uniqueProducts.map(async (prod) => {
-            // prod.product = await Model2.findById(prod.product._id);
-            prod.user = await Retailer.findById(prod.user._id);
-          })
-        );
+        // await Promise.all(
+        //   uniqueProducts.map(async (prod) => {
+        //     // prod.product = await Model2.findById(prod.product._id);
+        //     prod.user = await Retailer.findById(prod.user._id);
+        //   })
+        // );
 
        
         reply.send(uniqueProducts);

@@ -60,7 +60,7 @@ async function getViewed(fastify, options) {
         const viewedProductIds = user.viewed;
         const viewedProducts = await Product.find({
           _id: { $in: viewedProductIds },
-        }).populate("user");
+        });
 
         reply.send(viewedProducts);
       } catch (error) {

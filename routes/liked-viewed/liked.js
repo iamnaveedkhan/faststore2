@@ -52,7 +52,7 @@ async function getLiked(fastify, options) {
 
         const likedProducts = await Product.find({
           _id: { $in: likedProductIds },
-        }).populate("user");
+        });
 
         reply.send(likedProducts);
       } catch (error) {

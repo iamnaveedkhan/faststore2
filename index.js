@@ -67,7 +67,7 @@ fastify.get('/search/:key', async (req, reply) => {
         { "product.productName": { $regex: searchRegex } },
         { "product.type": { $regex: searchRegex } },
       ]
-    }).populate('user');
+    });
     
     reply.send(data);
   } catch (error) {
