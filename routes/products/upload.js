@@ -334,9 +334,8 @@ async function Upload(fastify, options) {
           product: {
             _id: existingProduct._id,
             productName: existingProduct.product.productName,
-            photo: existingProduct.product.photo[0],
-            groupId: existingProduct.product.groupId,
-            modelId: existingProduct.product._id,
+            variantId: existingProduct.variantId,
+            variants: existingProduct.variants,
           },
         });
 

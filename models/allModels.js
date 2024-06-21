@@ -163,7 +163,7 @@ const model2Schema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 });
 
-const variantSchema = new mongoose.Schema({
+const variantSchema = new mongoose.Schema({ 
   photo: {
     type: mongoose.Schema.Types.ObjectId,
     required: true
@@ -272,9 +272,8 @@ const inquirySchema = new mongoose.Schema({
   product: {
     _id: { type: "string" },
     productName: { type: "string" },
-    photo: { type: "string" },
-    groupId: { type: "string" },
-    modelId: { type: "string" },
+    variantId:{ type: Schema.Types.ObjectId, ref: "Variants" },
+    variants: variantSchema,
   },
 });
 
