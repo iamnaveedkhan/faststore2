@@ -669,7 +669,7 @@ async function getProduct(fastify, options) {
         const modelOrProductId = req.params.id;
         const userid = req.user.userId._id;
 
-        const existingData = await Model2.find({ groupId: modelOrProductId });
+        const existingData = await Model2.find({ variants: modelOrProductId }).populate('variants').populate('specification');
 
         reply.send(existingData);
       } catch (error) {
