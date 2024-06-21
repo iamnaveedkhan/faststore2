@@ -204,8 +204,6 @@ async function getProduct(fastify, options) {
     async (req, reply) => {
       try {
         const existingData = await Model2.find()
-          .populate("variants")
-          .populate("specification");
         console.log(existingData.length);
         if (existingData.length > 0) {
           reply.send(existingData);
@@ -228,15 +226,14 @@ async function getProduct(fastify, options) {
         let existingData;
 
         existingData = await Model2.find({ variants: userId })
-          .populate("specification")
-          .populate("variants")
-          .populate({
-            path: "variants",
-            populate: {
-              path: "photo",
-              model: "Photo",
-            },
-          });
+        .populate("specification")
+        .populate({
+          path: "variants",
+          populate: {
+            path: "variants.photo",
+            model: "Photo",
+          },
+        });
 
         if (existingData.length > 0) {
           reply.send(existingData);
