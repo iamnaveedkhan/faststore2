@@ -15,6 +15,7 @@ const {
   Staff,
   Address,
   Specification2,
+  Properties,
 } = require("../../models/allModels");
 
 async function getProduct(fastify, options) {
@@ -750,9 +751,12 @@ async function getProduct(fastify, options) {
         const Id = req.params.id;
         let existingData;
 
+       const properties = await Properties.find({
+          "brand": Id,
+        });
         existingData = await Product.find({
-          "product.properties.brand": Id,
-        }).populate("user");
+          properties:{ $in: properties }
+        })
         reply.send(existingData);
       } catch (error) {
         console.error(error);
