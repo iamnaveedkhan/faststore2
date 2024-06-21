@@ -690,7 +690,14 @@ async function getProduct(fastify, options) {
 
         const existingData = await Model2.find({ variants: modelOrProductId })
           .populate("variants")
-          .populate("specification");
+          .populate("specification")
+          .populate({
+            path: "variants",
+            populate: {
+              path: "variants.photo",
+              model: "Photo",
+            },
+          });
 
         reply.send(existingData);
       } catch (error) {
