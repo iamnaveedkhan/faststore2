@@ -564,6 +564,26 @@ async function getProduct(fastify, options) {
     }
   );
 
+
+
+  fastify.get(
+    "/nearByRetailers/:id",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      try {
+        const userId = req.params.id;
+
+        const nearbyUsers = await Retailer.findById(userId);
+
+        
+        reply.send(nearbyUsers.mobile);
+      } catch (error) {
+        console.error(error);
+        reply.code(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+
   fastify.get(
     "/nearby-retailers",
     { onRequest: [fastify.authenticate] },

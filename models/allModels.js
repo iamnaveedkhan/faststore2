@@ -300,6 +300,23 @@ const specificationSchema = new mongoose.Schema({
   },
 });
 
+const productReviewSchema = new mongoose.Schema({
+  productGroupId: {type:String, default:''},
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
+  review: {type:String, default:''},
+  image : [{type:String,default:''}],
+  rating: { type: Number, default: 1 },
+  date: { type: Date, default: Date.now },
+});
+
+const shopReviewSchema = new mongoose.Schema({
+  retailer: { type: mongoose.Schema.Types.ObjectId, ref: "Retailer" },
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
+  review: {type:String, default:''},
+  rating: { type: Number, default: 1 },
+  date: { type: Date, default: Date.now },
+});
+
 const chatSchema = new mongoose.Schema({
   retailer: { type: mongoose.Schema.Types.ObjectId, ref: "Retailer" },
   customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
@@ -343,6 +360,8 @@ const Status = mongoose.model("Status", statusSchema);
 const Photo = mongoose.model("Photo",photoSchema);
 const Properties = mongoose.model("Properties",propertiesSchema);
 const Variants = mongoose.model("Variants",variantsSchema);
+const ProductReview = mongoose.model("ProductReview", productReviewSchema);
+const ShopReview = mongoose.model("ShopReview", shopReviewSchema);
 
 module.exports = {
   Chat,
@@ -368,5 +387,7 @@ module.exports = {
   Status,
   Photo,
   Properties,
-  Variants
+  Variants,
+  ProductReview,
+  ShopReview,
 };
