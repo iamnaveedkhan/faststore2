@@ -74,8 +74,6 @@ async function addSpecification(fastify, options) {
             
             if (value1['isVariant'] === 'true' && value1['title'] !== '' && value1['title'] !== 'No') {
               variantFields[key1] = value1['title'];
-              spec2[key][key1] = value1['title'];
-              filter[key1] = [value1['title']];
             } else if (value1['isFilter'] === 'true' && value1['isVariant'] === 'false' && value1['title'] !== '' && value1['title'] !== 'No') {
               spec2[key][key1] = value1['title'];
               filter[key1] = [value1['title']];
