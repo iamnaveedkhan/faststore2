@@ -156,13 +156,13 @@ async function Upload(fastify, options) {
     async (req, reply) => {
       try {
         const { price, quantity,  mainId, variantId } = req.body;
-        console.log(mainId, price, quantity);
+        console.log(mainId, price, quantity, variantId);
         const userId = req.user.userId._id;
 
         let savedProduct;
 
         const existingProduct = await Product.findOne({
-          $and: [{ "variant._id": variantId }, { user: userId }],
+          $and: [{ "variants._id": variantId }, { user: userId }],
         });
 
         if (existingProduct) {
@@ -181,13 +181,12 @@ async function Upload(fastify, options) {
           }
           const allVariant = await Variants.findById(mainId);
           let variant={};
-          for await (const [key,value] of allVariant.variants){
+          for await (const value of allVariant.variants){
             if(value._id == variantId){
               variant = value;
             }
           }
          
-          console.log('variant        !!!!!!!     ',variant);
           const product = await Model2.findOne({variants:allVariant._id});
 
           if (!product) {

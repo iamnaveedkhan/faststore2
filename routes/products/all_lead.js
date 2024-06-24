@@ -61,7 +61,7 @@ async function getProduct(fastify, options) {
         const userId = req.params.id;
         let existingData;
         // if (userId.length > 10) {
-        existingData = await Product.find({ _id: userId })
+        existingData = await Product.find({ "variants._id": userId })
           .populate("user")
           .populate("specification")
           .populate("variantId")
@@ -69,7 +69,7 @@ async function getProduct(fastify, options) {
             path: "variants",
             populate: {
               path: "photo",
-              model: "Photo", // Assuming 'Photo' is the model for photos
+              model: "Photo",
             },
           });
         // } else {
@@ -716,7 +716,7 @@ async function getProduct(fastify, options) {
         const userid = req.user.userId._id;
 
         const existingData = await Product.findOne({
-          $and: [{ "product._id": modelOrProductId }, { user: userid }],
+          $and: [{ "variants._id": modelOrProductId }, { user: userid }],
         });
         reply.send({ count: existingData.quantity, price: existingData.price });
       } catch (error) {
