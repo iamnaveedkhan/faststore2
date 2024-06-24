@@ -388,44 +388,7 @@ async function getProduct(fastify, options) {
     }
   );
 
-  fastify.get(
-    "/specification/:id",
-    // { onRequest: [fastify.authenticate] },
-    async (req, reply) => {
-      try {
-        const specificationId = req.params.id;
-        const existingSpecifications = await Specification.find({
-          $or: [{ _id: specificationId }, { category: specificationId }],
-        });
-        if (existingSpecifications.length > 0) {
-          reply.send(existingSpecifications);
-        } else {
-          reply.code(204).send({ error: "No data found" });
-        }
-      } catch (error) {
-        console.error(error);
-        reply.code(500).send({ error: "Internal server error" });
-      }
-    }
-  );
-
-  fastify.get(
-    "/specifications",
-
-    async (req, reply) => {
-      try {
-        const existingSpecifications = await Specification.find();
-        if (existingSpecifications.length > 0) {
-          reply.send(existingSpecifications);
-        } else {
-          reply.code(204).send({ error: "No data found" });
-        }
-      } catch (error) {
-        console.error(error);
-        reply.code(500).send({ error: "Internal server error" });
-      }
-    }
-  );
+  
 
   fastify.get(
     "/activeCustomerandRetailerList/:type",
@@ -730,21 +693,19 @@ async function getProduct(fastify, options) {
   );
 
   fastify.get(
-    "/brandToModel/:id",
+    "/brand-to-model/:id",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const brandId = req.params.id;
-        const userid = req.user.userId._id;
-        const userData = await Retailer.findById({ _id: userid });
-
+        const Id = req.params.id;
         let existingData;
-        if (userData) {
-          existingData = await Model2.find({ "properties.brand": brandId });
-        } else {
-          reply.send({ error: "Not authroized" });
-        }
 
+       const properties = await Properties.find({
+          "brand": Id,
+        });
+        existingData = await Model2.find({
+          properties:{ $in: properties }
+        })
         reply.send(existingData);
       } catch (error) {
         console.error(error);
@@ -1210,6 +1171,8 @@ async function getProduct(fastify, options) {
       }
     }
   );
+
+  
 }
 
 module.exports = getProduct;

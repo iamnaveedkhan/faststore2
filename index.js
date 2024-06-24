@@ -45,7 +45,7 @@ fastify.register(require("@fastify/static"), {
   prefix: "/public/",
 });
 
-const { User, Product, Brand, Category, } = require("./models/allModels");
+const { User, Product, Brand, Category, Model2 } = require("./models/allModels");
 
 fastify.decorate("authenticate", async (req, reply) => {
   try {
@@ -76,33 +76,27 @@ fastify.get('/search/:key', async (req, reply) => {
   }
 });
 
-fastify.get(
-  "/logedin",
-  { onRequest: [fastify.authenticate] }, async function (req, reply) {
-    const userId = req.user.userId;
+fastify.get('/search-models/:key', async (req, reply) => {
+  try {
+    const key = req.params.key;
+    const searchRegex = new RegExp(key, 'i'); 
 
-    return reply.view("/public/logedin.ejs", { userId });
+    const data = await Model2.find({
+      $or: [
+        // { "brand.brandName": { $regex: searchRegex } },
+        { "product.productName": { $regex: searchRegex } },
+        { "product.type": { $regex: searchRegex } },
+      ]
+    });
+    
+    reply.send(data);
+  } catch (error) {
+    console.error('Error during search:', error);
+    reply.status(500).send({ error: 'Internal Server Error' });
   }
-);
+});
 
-fastify.get(
-  "/logedout",
-  { onRequest: [fastify.authenticate] },
-  function (req, reply) {
-    const userId = req.user.userId;
-    console.log(userId);
-    return reply.send("you are loged out");
-  }
-);
 
-fastify.get(
-  "/newdash",
-  { onRequest: [fastify.authenticate] },
-  function (req, reply) {
-    const userId = req.user.userId;
-    return reply.send("dashboard");
-  }
-);
 fastify.register(require("./routes/brand/index"));
 fastify.register(require("./routes/category/index"));
 fastify.register(require("./routes/subcategory/index"));
