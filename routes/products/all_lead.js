@@ -520,7 +520,7 @@ async function getProduct(fastify, options) {
           },
           {
             $group: {
-              _id: "$product",
+              _id: "$variants._id",
               products: { $push: "$$ROOT" },
             },
           },
