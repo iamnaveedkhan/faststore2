@@ -616,7 +616,10 @@ async function getProduct(fastify, options) {
         }).populate("user");
         let users = [];
         for await (const x of retailorsProducts) {
-          users.push(x.user);
+          if(!users.includes(x.user)){
+            users.push(x.user);
+          }
+          
         }
 
         reply.send(users);
