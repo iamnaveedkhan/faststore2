@@ -71,7 +71,6 @@ async function addSpecification(fastify, options) {
         for await (const [key, value] of Object.entries(specificationModel.specification)) {
           spec2[key] = {};
           for (const [key1, value1] of Object.entries(value)){
-            
             if (value1['isVariant'] === 'true' && value1['title'] !== '' && value1['title'] !== 'No') {
               variantFields[key1] = value1['title'];
             } else if (value1['isFilter'] === 'true' && value1['isVariant'] === 'false' && value1['title'] !== '' && value1['title'] !== 'No') {
@@ -106,7 +105,7 @@ async function addSpecification(fastify, options) {
           filters:  filter,
           properties: propertiesModel._id,
           specification: specificationModel._id,
-          
+          thumbnail:thumbnail,
         });
 
         const savedModel = await model.save();
@@ -147,8 +146,7 @@ async function addSpecification(fastify, options) {
               colorCode = part.value;
             }else{
               variant[part.fieldname] = part.value;
-            }
-              
+            } 
             }
         }
   
@@ -178,7 +176,7 @@ async function addSpecification(fastify, options) {
           variantFields: variant
         };
   
-        variantModel.variants.push(newVariant); // Use push to add new variant to the array
+        variantModel.variants.push(newVariant);
         await variantModel.save();
   
         let model2 = await Model2.findOne({ variants: req.params.id });
