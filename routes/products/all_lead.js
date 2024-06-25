@@ -54,14 +54,17 @@ async function getProduct(fastify, options) {
   });
 
   fastify.get(
-    "/product/:id",
+    "/product/:id/:retailer",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
         const userId = req.params.id;
+        const retailer = req.params.retailer;
+        console.log('Received parameters:', { userId, retailer });
+
         let existingData;
         // if (userId.length > 10) {
-        existingData = await Product.find({ "variants._id": userId })
+        existingData = await Product.find({ $and: [{ "variants._id": userId }, { "user":retailer }] })
           .populate("user")
           .populate("specification")
           .populate("variantId")
@@ -77,7 +80,7 @@ async function getProduct(fastify, options) {
         //     "product.groupId": userId,
         //   }).populate('user');
         // }
-
+        console.log('Query result:', existingData);
         if (existingData.length > 0) {
           reply.send(existingData);
         } else {
@@ -1008,9 +1011,18 @@ async function getProduct(fastify, options) {
         });
 
         const myProduct = await Product.find({
-          "product._id": modelId,
+          "variants._id": modelId,
           user: { $in: nearbyUsers },
-        }).populate("user");
+        }).populate("user")
+        .populate("specification")
+        .populate("variantId")
+        .populate({
+          path: "variants",
+          populate: {
+            path: "photo",
+            model: "Photo",
+          },
+        });
         return reply.send(myProduct);
       } catch (error) {
         console.error(error);
