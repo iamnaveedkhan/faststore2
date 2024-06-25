@@ -44,12 +44,12 @@ async function getreview(fastify, options) {
   //------------------product---------------------------------
 
   fastify.get(
-    "/product-reviews/:groupid",
+    "/product-reviews/:variantId",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const groupid = req.params.groupid;
-        const productReview = await ProductReview.find({productGroupId: groupid,}).populate({
+        const variantId = req.params.variantId;
+        const productReview = await ProductReview.find({productGroupId: variantId,}).populate({
           path: "customer",
           select: "name mobile",
         });
@@ -63,13 +63,13 @@ async function getreview(fastify, options) {
 
 
   fastify.get(
-    "/your-product-review/:groupid",
+    "/your-product-review/:variantId",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const groupid = req.params.groupid;
+        const variantId = req.params.variantId;
         const customerId = req.user.userId._id;
-        const productReview = await ProductReview.find({productGroupId: groupid,customer : customerId }).populate({path: "customer", select: "name mobile", });
+        const productReview = await ProductReview.find({productGroupId: variantId,customer : customerId }).populate({path: "customer", select: "name mobile", });
 
         return { productReview, true: true };
       } catch (error) {

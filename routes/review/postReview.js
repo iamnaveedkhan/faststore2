@@ -48,7 +48,7 @@ async function postreview(fastify, options) {
         const customerId = req.user.userId._id;
 
         const parts = req.parts();
-        let groupId;
+        let variantId;
         let reviewText = "";
         let rating;
         let fileName;
@@ -63,8 +63,8 @@ async function postreview(fastify, options) {
             await part.file.pipe(writableStream);
             image.push(`public/image/${fileName}`);
           } else if (part.type === "field") {
-            if (part.fieldname === "groupId") {
-              groupId = part.value;
+            if (part.fieldname === "variantId") {
+              variantId = part.value;
             } else if (part.fieldname === "review") {
               reviewText = part.value;
             } else if (part.fieldname === "rating") {
@@ -78,7 +78,7 @@ async function postreview(fastify, options) {
         }
 
         const existingReview = await ProductReview.findOne({
-          productGroupId: groupId,
+          productGroupId: variantId,
           customer: customerId,
         });
 
@@ -93,7 +93,7 @@ async function postreview(fastify, options) {
           });
         } else {
           const newReview = new ProductReview({
-            productGroupId: groupId,
+            productGroupId: variantId,
             customer: customerId,
             review: reviewText,
             image: image,
