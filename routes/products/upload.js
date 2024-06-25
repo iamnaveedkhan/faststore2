@@ -769,7 +769,7 @@ async function Upload(fastify, options) {
           if (part.file) {
             console.log(part.filename);
             fileName = part.filename;
-            const filePath = path.join("public/image/", fileName);
+            const filePath = path.join("public/glb/", fileName);
             const writableStream = fs.createWriteStream(filePath);
             await part.file.pipe(writableStream);
             threeDmodel = `public/glb/${fileName}`;
