@@ -27,7 +27,7 @@ async function getSpecification(fastify, options) {
         const specificationId = req.params.id;
         const existingSpecifications = await Specification.find({
           $or: [{ _id: specificationId }, { category: specificationId }],
-        });
+        }).populate('category');
         if (existingSpecifications.length > 0) {
           reply.send(existingSpecifications);
         } else {
