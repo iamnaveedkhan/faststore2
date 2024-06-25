@@ -524,7 +524,6 @@ async function Upload(fastify, options) {
     async (req, reply) => {
       try {
         const models = await Model2.find();
-        const yesVal = "Yes";
 
         if (!models || models.length === 0) {
           return reply.code(404).send({ error: "No models found" });
@@ -749,6 +748,38 @@ async function Upload(fastify, options) {
         statusData.comment = latestComment;
         statusData.status = StatusWantToSet;
         await statusData.save();
+      } catch (error) {
+        console.error("Error:", error);
+        reply.code(500).send({ error: "Internal Server Error" });
+      }
+    }
+  );
+
+  fastify.post(
+    "/three-D-model/:id",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      try {
+        
+        let fileName;
+        let threeDmodel;
+       console.log("cccccc",req.params.id);
+
+        for await (const part of req.parts()) {
+          if (part.file) {
+            console.log(part.filename);
+            fileName = part.filename;
+            const filePath = path.join("public/image/", fileName);
+            const writableStream = fs.createWriteStream(filePath);
+            await part.file.pipe(writableStream);
+            threeDmodel = `public/glb/${fileName}`;
+          }
+        }
+        const variant = Variants.findById(req.params.id);
+        variant.model3d = threeDmodel;
+        await variant.save();
+
+       return threeDmodel;
       } catch (error) {
         console.error("Error:", error);
         reply.code(500).send({ error: "Internal Server Error" });
