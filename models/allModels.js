@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const moment = require("moment-timezone");
 const crypto = require("crypto");
+const { type } = require("os");
 
 const dateIndia = moment.tz("Asia/kolkata");
 const formattedDate = dateIndia.format();
@@ -184,6 +185,8 @@ const variantSchema = new mongoose.Schema({
 });
 
 const variantsSchema = new mongoose.Schema({
+  model3d:{type:String,default:''},
+  rating: { type: Number, default: 1.0 },
   variants: {
     type: [variantSchema], // Changed from Map to Array
     default: [] // Ensure it defaults to an empty array

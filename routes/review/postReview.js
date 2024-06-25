@@ -73,7 +73,7 @@ async function postreview(fastify, options) {
           }
         }
 
-        if (!groupId) {
+        if (!variantId) {
           return reply.status(400).send({ error: "Product ID is required" });
         }
 

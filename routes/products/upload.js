@@ -181,8 +181,12 @@ async function Upload(fastify, options) {
           }
           const allVariant = await Variants.findById(mainId);
           let variant={};
+          let filter = {};
           for await (const value of allVariant.variants){
             if(value._id == variantId){
+              value.variantFields.forEach((value2,key) => {
+                filter[key]=value2;
+              });
               variant = value;
             }
           }
@@ -192,7 +196,17 @@ async function Upload(fastify, options) {
           if (!product) {
             return reply.code(404).send({ error: "Product not found" });
           }
-
+          for await (let [key, value] of Object.entries(product.filters)) {
+            console.log(`before value  ${value}`);
+            console.log(`before key   ${key}`);
+            if (!filter.hasOwnProperty(key)) {
+              console.log(`after value   ${value[0]}`);
+              console.log(`after key   ${key}`);
+              filter[key] = value[0];
+            } else {
+              console.log('have already');
+            }
+          };
           const newProductData = {
             price: price,
             variantId:allVariant,
@@ -205,7 +219,7 @@ async function Upload(fastify, options) {
               productLink: product.product.productLink,
               type: product.product.type,
             },
-            filter:product.filters,
+            filter:filter,
             user: user,
           };
 
