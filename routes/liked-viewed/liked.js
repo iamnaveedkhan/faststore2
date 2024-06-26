@@ -1,43 +1,46 @@
-const { Product, Liked } = require("../../models/allModels");
+const { Product, Liked, Customer } = require("../../models/allModels");
 
 async function getLiked(fastify, options) {
+  // -----------post route---------------
 
-    // -----------post route---------------
+  fastify.post(
+    "/liked/:id",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      try {
+        const userId = req.user.userId._id;
+        const requestedProductId = req.params.id;
 
-    fastify.post(
-      "/liked/:id",
-      { onRequest: [fastify.authenticate] },
-      async (req, reply) => {
-        try {
-          const userId = req.user.userId._id;
-          const requestedProductId = req.params.id;
-    
-          let user = await Liked.findOne({ user: userId });
-          if (!user) {
-            user = new Liked({ user: userId, liked: [] });
-          }
-    
-          const index = user.liked.indexOf(requestedProductId);
-    
-          if (index === -1) {
-            user.liked.push(requestedProductId);
-            await user.save();
-            reply.send({ message: "Product liked successfully" });
-          } else {
-            user.liked.splice(index, 1);
-            await user.save();
-            reply.send({ message: "Product unliked successfully" });
-            
-          }
-        } catch (error) {
-          console.error(error);
-          reply.code(500).send({ error: "Internal server error" });
+        let likedUserData = await Liked.findOne({ user: userId });
+        if (!likedUserData) {
+          likedUserData = new Liked({ user: userId, liked: [] });
         }
-      }
-    );
-    
 
-    // -----------get route---------------
+        const index = likedUserData.liked.indexOf(requestedProductId);
+
+        let userData = await Customer.findById(userId);
+
+        if (index === -1) {
+          likedUserData.liked.push(requestedProductId);
+          userData.liked++;
+          await userData.save();
+          await likedUserData.save();
+          reply.send({ message: "Product liked successfully" });
+        } else {
+          likedUserData.liked.splice(index, 1);
+          userData.liked--;
+          await userData.save();
+          await likedUserData.save();
+          reply.send({ message: "Product unliked successfully" });
+        }
+      } catch (error) {
+        console.error(error);
+        reply.code(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+
+  // -----------get route---------------
 
   fastify.get(
     "/get-liked-products",
@@ -45,14 +48,15 @@ async function getLiked(fastify, options) {
     async (req, reply) => {
       try {
         const userId = req.user.userId._id;
-        
+
         const user = await Liked.findOne({ user: userId });
         const likedProductIds = user.liked;
         console.log(likedProductIds);
 
         const likedProducts = await Product.find({
           _id: { $in: likedProductIds },
-        });
+        }).populate("user");
+
 
         reply.send(likedProducts);
       } catch (error) {
@@ -86,6 +90,35 @@ async function getLiked(fastify, options) {
       }
     }
   );
+
+  // -----------------------------------liked-for-dashboard-----------------------------------
+
+  fastify.get(
+    "/likedCounts-likedProducts/:id",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      try {
+        const customerId = req.params.id;
+        const likedData = await Liked.findOne({ user: customerId });
+  
+        if (likedData) {
+          const likedProducts = await Product.find({
+            _id: { $in: likedData.liked },
+          })
+          reply.send({ likedCount: likedProducts.length ,likedProdcuts: likedProducts });
+        } else {
+          console.log("No liked data found for the user.");
+          reply.status(404).send({ error: "No liked data found for the user." });
+        }
+
+      } catch (error) {
+        console.log("Error fetching likedCounts-likedProducts:", error);
+        reply.status(500).send({ error: "Internal Server Error" });
+      }
+    }
+  );
+  
+
 }
 
 module.exports = getLiked;

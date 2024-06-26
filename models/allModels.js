@@ -34,7 +34,7 @@ const staffSchema = new Schema({
     default: function () {
       return crypto.randomBytes(4).toString("hex");
     },
-    unique: true
+    unique: true,
   },
   manager: { type: Schema.Types.ObjectId, ref: "Staff" },
   date: { type: Date, default: Date.now },
@@ -51,8 +51,9 @@ const customerSchema = new Schema({
     default: function () {
       return crypto.randomBytes(4).toString("hex");
     },
-    unique: true
+    unique: true,
   },
+  liked: {type: Number, default: 0},
   longitude: { type: String, default: "" },
   latitude: { type: String, default: "" },
   firetoken: { type: String, default: "" },
@@ -74,12 +75,14 @@ const retailerSchema = new Schema({
     default: function () {
       return crypto.randomBytes(4).toString("hex");
     },
-    unique: true
+    unique: true,
   },
   manager: { type: Schema.Types.ObjectId, ref: "Staff", default: null },
   pickedDate: { type: Date, default: null },
   statusDate: { type: Date, default: Date.now },
   date: { type: Date, default: Date.now },
+  retailerShopLogo: { type: String, default: "" },
+  isSponsored : { type: Boolean, default: false },
 });
 
 const statusSchema = new Schema({
@@ -138,66 +141,71 @@ const modelSchema = new mongoose.Schema({
 });
 
 const photoSchema = new mongoose.Schema({
-  photoId :{
+  photoId: {
     type: String,
     default: function () {
       return crypto.randomBytes(4).toString("hex");
     },
-    unique: true
+    unique: true,
   },
   photoList: [String],
-})
+});
 
 const model2Schema = new mongoose.Schema({
-  modelId: { type: String,default: function () { return Math.random().toString(36).substring(7); } },
+  modelId: {
+    type: String,
+    default: function () {
+      return Math.random().toString(36).substring(7);
+    },
+  },
   product: {
-    productName: { type: String,default: null },
+    productName: { type: String, default: null },
     productLink: { type: String, default: "" },
     type: { type: String, default: null },
   },
   thumbnail: { type: String, default: "" },
   variants: { type: Schema.Types.ObjectId, ref: "Variants" },
   filters: mongoose.Schema.Types.Mixed,
-  
+
   properties: { type: Schema.Types.ObjectId, ref: "Properties" },
   specification: { type: Schema.Types.ObjectId, ref: "Specification2" },
   isActive: { type: Boolean, default: true },
 });
 
-const variantSchema = new mongoose.Schema({ 
+const variantSchema = new mongoose.Schema({
   photo: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
   },
   thumbnail: {
     type: String,
-    required: true
+    required: true,
   },
   colorCode: {
     type: String,
-    default: ''
+    default: "",
   },
   variantFields: {
     type: Map,
     of: mongoose.Schema.Types.Mixed,
-    default: {}
-  }
+    default: {},
+  },
 });
 
 const variantsSchema = new mongoose.Schema({
-  model3d:{type:String,default:''},
+  model3d: { type: String, default: "" },
   rating: { type: Number, default: 1.0 },
   variants: {
     type: [variantSchema], // Changed from Map to Array
-    default: [] // Ensure it defaults to an empty array
-  }
+    default: [], // Ensure it defaults to an empty array
+  },
 });
 
 // Pre-save middleware to ensure each variant has an _id (if needed)
-variantsSchema.pre('save', function (next) {
+variantsSchema.pre("save", function (next) {
   const doc = this;
-  if (doc.isModified('variants') || doc.isNew) {
-    doc.variants.forEach(variant => {
+  if (doc.isModified("variants") || doc.isNew) {
+    doc.variants.forEach((variant) => {
       if (!variant._id) {
         variant._id = new mongoose.Types.ObjectId();
       }
@@ -211,7 +219,7 @@ const propertiesSchema = new mongoose.Schema({
   subcategory: { type: String, default: null },
   vertical: { type: String, default: null },
   brand: { type: String, default: null },
-})
+});
 
 const likedSchema = new mongoose.Schema({
   user: { type: Schema.Types.ObjectId, ref: "Customer" },
@@ -225,29 +233,29 @@ const viewedSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   product: {
-    productName: { type: String,default: null },
+    productName: { type: String, default: null },
     productLink: { type: String, default: "" },
     type: { type: String, default: null },
   },
-  variantId:{ type: Schema.Types.ObjectId, ref: "Variants" },
-  variants:{
-    _id:{ type: String, default: "" },
-    photo: {type: mongoose.Schema.Types.ObjectId,required: true},
-    thumbnail: {type: String,required: true},
-    colorCode: {type: String,default: ''},
-    variantFields:{
+  variantId: { type: Schema.Types.ObjectId, ref: "Variants" },
+  variants: {
+    _id: { type: String, default: "" },
+    photo: { type: mongoose.Schema.Types.ObjectId, required: true },
+    thumbnail: { type: String, required: true },
+    colorCode: { type: String, default: "" },
+    variantFields: {
       type: Map,
       of: mongoose.Schema.Types.Mixed,
-      default: {}
+      default: {},
     },
   },
   properties: { type: Schema.Types.ObjectId, ref: "Properties" },
   specification: { type: Schema.Types.ObjectId, ref: "Specification2" },
-  filter:mongoose.Schema.Types.Mixed,
+  filter: mongoose.Schema.Types.Mixed,
   user: { type: Schema.Types.ObjectId, ref: "Retailer" },
   price: { type: Number },
   quantity: { type: Number },
-  date: {type: Date,default: formattedDate,},
+  date: { type: Date, default: formattedDate },
   featured: { type: Boolean, default: false },
   liked: { type: Number, default: 0 },
   viewed: { type: Number, default: 0 },
@@ -275,18 +283,18 @@ const inquirySchema = new mongoose.Schema({
   product: {
     _id: { type: "string" },
     productName: { type: "string" },
-    variantId:{ type: Schema.Types.ObjectId, ref: "Variants" },
+    variantId: { type: Schema.Types.ObjectId, ref: "Variants" },
     variants: variantSchema,
   },
 });
 
 const specification2Schema = new mongoose.Schema({
-  specId :{
+  specId: {
     type: String,
     default: function () {
       return crypto.randomBytes(4).toString("hex");
     },
-    unique: true
+    unique: true,
   },
   specification: mongoose.Schema.Types.Mixed,
 });
@@ -304,10 +312,10 @@ const specificationSchema = new mongoose.Schema({
 });
 
 const productReviewSchema = new mongoose.Schema({
-  productGroupId: {type:String, default:''},
+  productGroupId: { type: String, default: "" },
   customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
-  review: {type:String, default:''},
-  image : [{type:String,default:''}],
+  review: { type: String, default: "" },
+  image: [{ type: String, default: "" }],
   rating: { type: Number, default: 1 },
   date: { type: Date, default: Date.now },
 });
@@ -315,7 +323,7 @@ const productReviewSchema = new mongoose.Schema({
 const shopReviewSchema = new mongoose.Schema({
   retailer: { type: mongoose.Schema.Types.ObjectId, ref: "Retailer" },
   customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
-  review: {type:String, default:''},
+  review: { type: String, default: "" },
   rating: { type: Number, default: 1 },
   date: { type: Date, default: Date.now },
 });
@@ -328,8 +336,8 @@ const chatSchema = new mongoose.Schema({
   status: { type: Number, default: false },
   messages: [
     {
-      sender: { type: String  },
-      receiver: { type: String},
+      sender: { type: String },
+      receiver: { type: String },
       content: String,
       timestamp: { type: Date, default: Date.now },
       isRead: { type: Boolean, default: false },
@@ -360,9 +368,9 @@ const Specification = mongoose.model("Specification", specificationSchema);
 const Specification2 = mongoose.model("Specification2", specification2Schema);
 const FollowUp = mongoose.model("FollowUp", followupSchema);
 const Status = mongoose.model("Status", statusSchema);
-const Photo = mongoose.model("Photo",photoSchema);
-const Properties = mongoose.model("Properties",propertiesSchema);
-const Variants = mongoose.model("Variants",variantsSchema);
+const Photo = mongoose.model("Photo", photoSchema);
+const Properties = mongoose.model("Properties", propertiesSchema);
+const Variants = mongoose.model("Variants", variantsSchema);
 const ProductReview = mongoose.model("ProductReview", productReviewSchema);
 const ShopReview = mongoose.model("ShopReview", shopReviewSchema);
 
