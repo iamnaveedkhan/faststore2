@@ -80,7 +80,8 @@ const retailerSchema = new Schema({
   pickedDate: { type: Date, default: null },
   statusDate: { type: Date, default: Date.now },
   date: { type: Date, default: Date.now },
-  isSponsored:{ type: Boolean, default: false },
+  retailerShopLogo: { type: String, default: "" },
+  isSponsored : { type: Boolean, default: false },
 });
 
 const statusSchema = new Schema({
