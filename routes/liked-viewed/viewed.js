@@ -10,6 +10,7 @@ async function getViewed(fastify, options) {
       try {
         const productId = req.params.id;
         const userId = req.user.userId._id;
+        const retailer = req.body.retailer;
   
         const userData = await Customer.findOne({ _id: userId });
         if (!userData) {
@@ -21,6 +22,10 @@ async function getViewed(fastify, options) {
         if (!userViewed) {
           userViewed = new Viewed({ user: userId, viewed: [] });
         }
+
+        const product = await Product.findOne({$and: [{ "variants._id": productId }, { "user":retailer }]})
+        product.viewed = product.viewed+1;
+        await product.save();
   
         if (userData.cId) {
           if (!userViewed.viewed.includes(productId)) {
@@ -59,8 +64,8 @@ async function getViewed(fastify, options) {
    
         const viewedProductIds = user.viewed;
         const viewedProducts = await Product.find({
-          _id: { $in: viewedProductIds },
-        }).populate("user");
+          "variants._id": { $in: viewedProductIds },
+        });
 
         reply.send(viewedProducts);
       } catch (error) {
