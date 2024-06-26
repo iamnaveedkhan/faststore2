@@ -53,6 +53,7 @@ const customerSchema = new Schema({
     },
     unique: true,
   },
+  liked: {type: Number, default: 0},
   longitude: { type: String, default: "" },
   latitude: { type: String, default: "" },
   firetoken: { type: String, default: "" },
