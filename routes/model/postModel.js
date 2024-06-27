@@ -122,6 +122,18 @@ async function addSpecification(fastify, options) {
     }
   );
 
+  fastify.get('/variantFields/:id',async (req,reply)=>{
+    try {
+      const variantId = req.params.id;
+      const variantFields = await Variants.findById(variantId);
+      return variantFields.variants[0].variantFields;
+
+    } catch (error) {
+      console.error("Error fetching variantFields :", error);
+      reply.code(500).send({ error: "Internal Server Error" });
+    }
+  })
+
   fastify.post(
     "/add-variant/:id",
     async (req, reply) => {
@@ -211,6 +223,8 @@ async function addSpecification(fastify, options) {
       }
     }
   );
+
+
 }
 
 module.exports = addSpecification;
