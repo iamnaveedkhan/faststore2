@@ -207,7 +207,7 @@ async function getProduct(fastify, options) {
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const existingData = await Model2.find()
+        const existingData = await Model2.find().populate('properties')
         console.log(existingData.length);
         if (existingData.length > 0) {
           reply.send(existingData);
@@ -814,20 +814,17 @@ async function getProduct(fastify, options) {
     }
   );
 
+
   fastify.get(
-    "/inquiriesby-groupid-id/:Id",
+    "/inquiries-by-variantId/:id",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const Id = req.params.Id;
-        let enquiryData;
+        const id = req.params.id;
 
-        if (Id.length < 10) {
-          enquiryData = await Inquiry.find({ "product.groupId": Id });
-        } else if (Id.length > 10) {
-          enquiryData = await Inquiry.find({ "product.modelId": Id });
-        } else {
-          return reply.status(400).send({ error: "Invalid ID length" });
+        let enquiryData = await Inquiry.find({ "product.variantId": id });
+        if(enquiryData<0) {
+          return reply.status(400).send({ error: "Enquiries Not found!" });
         }
 
         return reply.send(enquiryData);
@@ -846,19 +843,7 @@ async function getProduct(fastify, options) {
         const Id = req.params.Id;
         let products;
 
-        if (Id.length < 10) {
-          products = await Product.find({
-            "product.groupId": Id,
-          }).populate("user");
-        } else {
-          products = await Product.find({ "product._id": Id }).populate("user");
-        }
-        let userData = [];
-        products.forEach((product, index) => {
-          userData[index] = product.user;
-        });
-
-        return userData;
+        
       } catch (error) {
         console.error(error);
         return reply.code(500).send({ error: "Internal server error" });
@@ -982,12 +967,15 @@ async function getProduct(fastify, options) {
     }
   );
 
+  
+
   fastify.get(
-    "/retailersOfProduct/:id",
+    "/retailersOfProduct/:id/:number",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
         const modelId = req.params.id;
+        const number = req.params.number;
         const EARTH_RADIUS_KM = 6371;
         const maxDistance = 5;
         const userId = req.user.userId._id;
@@ -1013,17 +1001,13 @@ async function getProduct(fastify, options) {
         const myProduct = await Product.find({
           "variants._id": modelId,
           user: { $in: nearbyUsers },
-        }).populate("user")
-        .populate("specification")
-        .populate("variantId")
-        .populate({
-          path: "variants",
-          populate: {
-            path: "photo",
-            model: "Photo",
-          },
-        });
-        return reply.send(myProduct);
+        }).populate("user");
+        if(number==1){
+          return reply.send(myProduct);
+        }else{
+          return reply.send(myProduct.length);
+        }
+        
       } catch (error) {
         console.error(error);
         reply.code(500).send({ error: "Internal server error" });
@@ -1183,6 +1167,8 @@ async function getProduct(fastify, options) {
       }
     }
   );
+
+  
 
   
 }

@@ -23,6 +23,7 @@ const {
   Customer,
   Status,
   Properties,
+  Photo,
 } = require("../../models/allModels");
 const bcrypt = require("bcrypt");
 const { log } = require("console");
@@ -143,19 +144,12 @@ async function Upload(fastify, options) {
   //   }
   // );
 
-
-
-
-
-
-
-
   fastify.post(
     "/add-product2",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const { price, quantity,  mainId, variantId } = req.body;
+        const { price, quantity, mainId, variantId } = req.body;
         console.log(mainId, price, quantity, variantId);
         const userId = req.user.userId._id;
 
@@ -166,7 +160,7 @@ async function Upload(fastify, options) {
         });
 
         if (existingProduct) {
-          console.log('existing');
+          console.log("existing");
           existingProduct.quantity = quantity;
           existingProduct.price = price;
 
@@ -180,18 +174,18 @@ async function Upload(fastify, options) {
             return reply.code(404).send({ error: "User not found" });
           }
           const allVariant = await Variants.findById(mainId);
-          let variant={};
+          let variant = {};
           let filter = {};
-          for await (const value of allVariant.variants){
-            if(value._id == variantId){
-              value.variantFields.forEach((value2,key) => {
-                filter[key]=value2;
+          for await (const value of allVariant.variants) {
+            if (value._id == variantId) {
+              value.variantFields.forEach((value2, key) => {
+                filter[key] = value2;
               });
               variant = value;
             }
           }
-         
-          const product = await Model2.findOne({variants:allVariant._id});
+
+          const product = await Model2.findOne({ variants: allVariant._id });
 
           if (!product) {
             return reply.code(404).send({ error: "Product not found" });
@@ -204,22 +198,22 @@ async function Upload(fastify, options) {
               console.log(`after key   ${key}`);
               filter[key] = value[0];
             } else {
-              console.log('have already');
+              console.log("have already");
             }
-          };
+          }
           const newProductData = {
             price: price,
-            variantId:allVariant,
-            variants:variant,
+            variantId: allVariant,
+            variants: variant,
             quantity: quantity,
-            specification:product.specification,
-            properties:product.properties,
+            specification: product.specification,
+            properties: product.properties,
             product: {
               productName: product.product.productName,
               productLink: product.product.productLink,
               type: product.product.type,
             },
-            filter:filter,
+            filter: filter,
             user: user,
           };
 
@@ -234,17 +228,6 @@ async function Upload(fastify, options) {
       }
     }
   );
-
-
-
-
-
-
-
-
-
-
-
 
   fastify.post(
     "/add-product",
@@ -760,10 +743,9 @@ async function Upload(fastify, options) {
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        
         let fileName;
         let threeDmodel;
-       console.log("cccccc",req.params.id);
+        console.log("cccccc", req.params.id);
 
         for await (const part of req.parts()) {
           if (part.file) {
@@ -779,7 +761,7 @@ async function Upload(fastify, options) {
         variant.model3d = threeDmodel;
         await variant.save();
 
-       return threeDmodel;
+        return threeDmodel;
       } catch (error) {
         console.error("Error:", error);
         reply.code(500).send({ error: "Internal Server Error" });
@@ -787,7 +769,21 @@ async function Upload(fastify, options) {
     }
   );
 
-
+  fastify.post(
+    "/view-update-variants/:id",
+    { onRequest: [fastify.authenticate] },
+    async (req, reply) => {
+      const id = req.params.id;
+      const varaintData = await Variants.findById(id).populate({
+        path: "variants",
+        populate: {path:"photo",
+          model:"Photo"
+        },
+      });
+      return varaintData;
+      
+    }
+  );
 }
 
 module.exports = Upload;
