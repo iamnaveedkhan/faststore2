@@ -185,6 +185,10 @@ const variantSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  mrp: {
+    type: Number,
+    default:0
+  },
   variantFields: {
     type: Map,
     of: mongoose.Schema.Types.Mixed,

@@ -24,6 +24,7 @@ async function addSpecification(fastify, options) {
         let productName;
         let thumbnail;
         let productLink;
+        let mrp = 0;
         thumbnail = `public/image/`
 
         const parts = req.parts();
@@ -53,6 +54,8 @@ async function addSpecification(fastify, options) {
               colorCode = part.value;
             }else if (part.fieldname == "productLink") {
               productLink = part.value;
+            }else if (part.fieldname == "mrp") {
+              mrp = part.value;
             } else {
               data[part.fieldname] = part.value;
             }
@@ -88,6 +91,7 @@ async function addSpecification(fastify, options) {
 
         const variant = {
           colorCode: colorCode,
+          mrp:mrp,
           photo: photoModel._id,
           thumbnail: thumbnail,
           variantFields: variantFields  // Use the initialized variantFields
@@ -127,6 +131,7 @@ async function addSpecification(fastify, options) {
         let variant = {};
         let thumbnail;
         let colorCode;
+        let mrp=0;
   
         const parts = req.parts();
   
@@ -145,6 +150,8 @@ async function addSpecification(fastify, options) {
           } else {
             if(part.fieldname=='colorCode'){
               colorCode = part.value;
+            }else if(part.fieldname=='mrp'){
+              mrp = part.value;
             }else{
               variant[part.fieldname] = part.value;
             } 
@@ -174,6 +181,7 @@ async function addSpecification(fastify, options) {
           photo: photoModel._id,
           thumbnail: thumbnail,
           colorCode: colorCode,
+          mrp:mrp,
           variantFields: variant
         };
   
