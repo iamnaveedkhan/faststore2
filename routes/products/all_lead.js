@@ -1168,9 +1168,61 @@ async function getProduct(fastify, options) {
     }
   );
 
-  
+fastify.get("/data-for-update-model/:id", async (req, reply) => {
+  try {
+    const modelId = req.params.id;
+    const modelData = await Model2.findById(modelId)
+      .populate({
+        path: "properties",
+        populate: {
+          path: "vertical",
+          select: "specification", 
+        },
+      })
+      .populate({
+        path: "specification",
+        select: "specification", // Adjust the fields you want to select from the specification model
+      });
 
+    return modelData;
+  } catch (error) {
+    console.error("Error :", error);
+    reply.code(500).send({ error: "Internal Server Error" });
+  }
+});
+
+// fastify.get("/dataType-change", async (req, reply) => {
+//   try {
+//     const propertiesDocs2 = await Properties.find();
+
+//     for await (const doc of propertiesDocs2) {
+      
+//       const updates = await Properties.findById(doc._id);
+//         const category = await Category.findById(updates.category)
+//         updates.category = category;
   
+//         const subcategory = await SubCategory.findById('6605ade2f1093ac2287348a2')
+//         updates.subcategory = subcategory;
+
+//         const vertical = await Specification.findById('663f2dd3018c49357e8f4730')
+//         updates.vertical = vertical;
+  
+//         const brand = await Brand.findById(updates.brand)
+//         updates.brand = brand;
+//         updates.markModified('brand');
+//         await updates.save();
+      
+//     }
+
+//     reply.send({ message: "Data type conversion completed successfully" });
+//   } catch (error) {
+//     console.error("Error :", error);
+//     reply.code(500).send({ error: "Internal Server Error" });
+//   }
+// });
+
+
+
 }
 
 module.exports = getProduct;

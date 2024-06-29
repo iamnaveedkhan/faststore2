@@ -5,7 +5,6 @@ const crypto = require("crypto");
 const { type } = require("os");
 
 const dateIndia = moment.tz("Asia/kolkata");
-const formattedDate = dateIndia.format();
 
 // const userSchema = new Schema({
 //   name: { type: String, default: "" },
@@ -53,7 +52,7 @@ const customerSchema = new Schema({
     },
     unique: true,
   },
-  liked: {type: Number, default: 0},
+  liked: { type: Number, default: 0 },
   longitude: { type: String, default: "" },
   latitude: { type: String, default: "" },
   firetoken: { type: String, default: "" },
@@ -82,7 +81,7 @@ const retailerSchema = new Schema({
   statusDate: { type: Date, default: Date.now },
   date: { type: Date, default: Date.now },
   retailerShopLogo: { type: String, default: "" },
-  isSponsored : { type: Boolean, default: false },
+  isSponsored: { type: Boolean, default: false },
 });
 
 const statusSchema = new Schema({
@@ -170,6 +169,7 @@ const model2Schema = new mongoose.Schema({
   properties: { type: Schema.Types.ObjectId, ref: "Properties" },
   specification: { type: Schema.Types.ObjectId, ref: "Specification2" },
   isActive: { type: Boolean, default: true },
+  date: { type: Date, default: dateIndia.format() },
 });
 
 const variantSchema = new mongoose.Schema({
@@ -187,7 +187,11 @@ const variantSchema = new mongoose.Schema({
   },
   mrp: {
     type: Number,
-    default:0
+    default: 0,
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
   },
   variantFields: {
     type: Map,
@@ -205,7 +209,6 @@ const variantsSchema = new mongoose.Schema({
   },
 });
 
-// Pre-save middleware to ensure each variant has an _id (if needed)
 variantsSchema.pre("save", function (next) {
   const doc = this;
   if (doc.isModified("variants") || doc.isNew) {
@@ -219,10 +222,10 @@ variantsSchema.pre("save", function (next) {
 });
 
 const propertiesSchema = new mongoose.Schema({
-  category: { type: String, default: null },
-  subcategory: { type: String, default: null },
-  vertical: { type: String, default: null },
-  brand: { type: String, default: null },
+  category:{ type: Schema.Types.ObjectId, ref: "Category" },
+  subcategory: { type: Schema.Types.ObjectId, ref: "SubCategory" },
+  vertical: { type: Schema.Types.ObjectId, ref: "Specification" },
+  brand: { type: Schema.Types.ObjectId, ref: "Brand" },
 });
 
 const likedSchema = new mongoose.Schema({
@@ -259,7 +262,7 @@ const productSchema = new mongoose.Schema({
   user: { type: Schema.Types.ObjectId, ref: "Retailer" },
   price: { type: Number },
   quantity: { type: Number },
-  date: { type: Date, default: formattedDate },
+  date: { type: Date, default: dateIndia.format() },
   featured: { type: Boolean, default: false },
   liked: { type: Number, default: 0 },
   viewed: { type: Number, default: 0 },
@@ -311,7 +314,7 @@ const specificationSchema = new mongoose.Schema({
 
   date: {
     type: Date,
-    default: formattedDate,
+    default: dateIndia.format(),
   },
 });
 
