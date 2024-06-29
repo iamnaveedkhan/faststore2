@@ -305,7 +305,7 @@ async function addSpecification(fastify, options) {
 
 
   fastify.post(
-    "/update-variant/:id/:variantId",
+    "/update-variant/:id/:variantFieldId",
     async (req, reply) => {
       try {
         let photos = [];
@@ -315,7 +315,7 @@ async function addSpecification(fastify, options) {
 
         const variantModel = await Variants.findById(req.params.id);
         for await (const x of variantModel.variants){
-          if(x._id==req.params.variantId){
+          if(x._id==req.params.variantFieldId){
             variant=x;
             photoId=x.photo
           }
@@ -336,7 +336,7 @@ async function addSpecification(fastify, options) {
         let variantFields = {};
 
         for await (let x of variantModel.variants){
-          if(x._id==req.params.variantId){
+          if(x._id==req.params.variantFieldId){
        
             for await (const part of parts) {
               if (part.type === "file") {
