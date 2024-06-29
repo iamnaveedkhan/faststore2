@@ -58,13 +58,29 @@ async function getProduct(fastify, options) {
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
-        const userId = req.params.id;
+
+
+        const EARTH_RADIUS_KM = 6371;
+        const maxDistance = 5;
+        const userId = req.user.userId._id;
+        const user = await Customer.findById(userId);
+        const userLatitude = parseFloat(user.latitude);
+        const userLongitude = parseFloat(user.longitude);
+        const deltaLatitude = (maxDistance / EARTH_RADIUS_KM) * (180 / Math.PI);
+        const deltaLongitude =
+          ((maxDistance / EARTH_RADIUS_KM) * (180 / Math.PI)) /
+          Math.cos((userLatitude * Math.PI) / 180);
+        const minLatitude = userLatitude - deltaLatitude;
+        const maxLatitude = userLatitude + deltaLatitude;
+        const minLongitude = userLongitude - deltaLongitude;
+        const maxLongitude = userLongitude + deltaLongitude;
+        const id = req.params.id;
         const retailer = req.params.retailer;
         console.log('Received parameters:', { userId, retailer });
 
         let existingData;
         // if (userId.length > 10) {
-        existingData = await Product.find({ $and: [{ "variants._id": userId }, { "user":retailer }] })
+        existingData = await Product.find({ $and: [{ "variants._id": id }, { "user":retailer }] })
           .populate("user")
           .populate("specification")
           .populate("variantId")
@@ -82,9 +98,27 @@ async function getProduct(fastify, options) {
         // }
         console.log('Query result:', existingData);
         if (existingData.length > 0) {
+          console.log('in if');
           reply.send(existingData);
         } else {
-          reply.code(204).send({ error: "No data found" });
+        
+          console.log('in else');
+          const nearbyUsers = await Retailer.find({
+          latitude: { $gte: minLatitude, $lte: maxLatitude },
+          longitude: { $gte: minLongitude, $lte: maxLongitude },
+        });
+          existingData = await Product.find({ $and: [{ "variants._id": id }, {user: { $in: nearbyUsers }}] }).limit(1)
+          .populate("user")
+          .populate("specification")
+          .populate("variantId")
+          .populate({
+            path: "variants",
+            populate: {
+              path: "photo",
+              model: "Photo",
+            },
+          });
+          reply.send(existingData);
         }
       } catch (error) {
         console.error(error);
