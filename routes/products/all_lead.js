@@ -483,20 +483,24 @@ async function getProduct(fastify, options) {
   );
 
   fastify.get(
-    "/nearbyAndOffers",
+    "/nearbyAndOffers/:page",
     { onRequest: [fastify.authenticate] },
     async (req, reply) => {
       try {
         const EARTH_RADIUS_KM = 6371;
         const maxDistance = 5;
         const userId = req.user.userId._id;
+        const page = parseInt(req.params.page) || 1;
+        const limit = parseInt(req.query.limit) || 15;
+        const skip = (page - 1) * limit;
+  
         console.log(userId);
-
+  
         // Retrieve user's location
         const user = await Customer.findById(userId);
         const userLatitude = parseFloat(user.latitude);
         const userLongitude = parseFloat(user.longitude);
-
+  
         // Calculate latitude and longitude ranges
         const deltaLatitude = (maxDistance / EARTH_RADIUS_KM) * (180 / Math.PI);
         const deltaLongitude =
@@ -506,12 +510,12 @@ async function getProduct(fastify, options) {
         const maxLatitude = userLatitude + deltaLatitude;
         const minLongitude = userLongitude - deltaLongitude;
         const maxLongitude = userLongitude + deltaLongitude;
-
+  
         const nearbyUsers = await Retailer.find({
           latitude: { $gte: minLatitude, $lte: maxLatitude },
           longitude: { $gte: minLongitude, $lte: maxLongitude },
         });
-
+  
         const uniqueProducts = await Product.aggregate([
           {
             $match: {
@@ -526,7 +530,6 @@ async function getProduct(fastify, options) {
           },
           { $unwind: "$products" },
           { $sort: { "products.price": 1 } },
-          // { $limit: 10 },
           {
             $group: {
               _id: "$_id",
@@ -534,29 +537,21 @@ async function getProduct(fastify, options) {
             },
           },
           { $replaceRoot: { newRoot: "$product" } },
+          { $skip: skip },
+          { $limit: limit },
         ]);
-
-        // await Promise.all(
-        //   uniqueProducts.map(async (prod) => {
-        //     // prod.product = await Model2.findById(prod.product._id);
-        //     prod.user = await Retailer.findById(prod.user._id);
-        //   })
-        // );
-
-        // await Promise.all(
-        //   uniqueProducts.map(async (prod) => {
-        //     // prod.product = await Model2.findById(prod.product._id);
-        //     prod.Specification = await Specification2.findById(prod.specification._id);
-        //   })
-        // );
-
+  
         const activeOffers = await Offers.find({
           user: { $in: nearbyUsers },
           isActive: true,
-        });
+        }).skip(skip).limit(limit);
+  
         reply.send({
           offer: activeOffers,
           product: uniqueProducts,
+          currentPage: page,
+          totalOffers: activeOffers.length,
+          totalProducts: uniqueProducts.length,
         });
       } catch (error) {
         console.error(error);
@@ -564,7 +559,7 @@ async function getProduct(fastify, options) {
       }
     }
   );
-
+  
 
 
   fastify.get(
